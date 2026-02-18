@@ -1,0 +1,86 @@
+---
+title: "Job Change Comparison by State"
+format: 
+  html:
+    embed-resources: true
+    code-fold: true
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(openxlsx)
+library(readxl)
+library(DatawRappr)
+```
+
+```{r clean up, echo=FALSE, warning=FALSE}
+# Percentage change in jobs, Clean and Format
+jobchange <- read_csv("/projects/ecohn/state_jobs_day/output/jobs_nonfarm.csv") |> 
+filter(series_id != "NA") |> 
+select(-series_id)
+# set current month object
+current_month <- tail(colnames(jobchange), 1)
+
+# create comparison dataframe
+jobcomp <- jobchange |>
+  rename(!!current_month := !!sym(current_month)) |> 
+  mutate(feb_2020 = .data[["2020-02-01"]],
+         jan_2025 = .data[["2025-01-01"]],
+         covid_change = ((.data[[current_month]] / feb_2020) - 1)*100,
+         trump_change = ((.data[[current_month]] / jan_2025) - 1)*100)
+
+job_long <- jobcomp |> 
+  select(geo_name, covid_change, trump_change) |> 
+  pivot_longer(cols = c(covid_change, trump_change),
+               names_to = "comparison",
+               values_to = "change") |> 
+  mutate(percents = ifelse(change < 0, "negative", "positive"))
+```
+
+```{r plots, echo=FALSE, warning=FALSE, fig.width=12, fig.height=8, results='asis'}
+states <- sort(unique(jobcomp$geo_name))
+
+# Create dropdown
+cat('<select id="stateSelector" onchange="showState(this.value)" style="padding: 10px; font-size: 16px; margin-bottom: 20px;">\n')
+for(i in seq_along(states)) {
+  cat(sprintf('  <option value="plot-%d">%s</option>\n', i, states[i]))
+}
+cat('</select>\n\n')
+
+# Create plots for each state
+for(i in seq_along(states)) {
+  state <- states[i]
+  
+  cat(sprintf('<div id="plot-%d" style="display: %s;">\n\n', 
+              i, ifelse(i == 1, "block", "none")))
+  
+  # First plot: Comparison line chart
+  plot <- job_long |> 
+    filter(geo_name == state) |>
+    ggplot(aes(x = comparison, y = change, fill = percents)) +
+    geom_col() +
+    scale_fill_manual(values = c("negative" = "#d73027",
+                                 "positive" = "#4575b4")) +
+    labs(title = paste(state, "- Job change"),
+         y = "Job change %",
+        fill = NULL) +
+    theme(legend.position = "none")
+    theme_minimal()
+  
+  print(plot)
+  
+  cat('\n\n</div>\n\n')
+}
+```
+
+```{=html}
+<script>
+function showState(plotId) {
+  var divs = document.querySelectorAll('[id^="plot-"]');
+  divs.forEach(function(div) {
+    div.style.display = 'none';
+  });
+  document.getElementById(plotId).style.display = 'block';
+}
+</script>
+```
