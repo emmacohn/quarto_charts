@@ -4,7 +4,10 @@ format:
   html:
     embed-resources: true
     code-fold: true
+    output-file: "index"
 ---
+
+These charts show the change in **total nonfarm employment** from the *beginning of COVID* (February, 2020) and the *start of the second Trump Administration* (January, 2025)*.* Change is calculated using the **most recent month of data available** (currently: December 2025). Blue bars represent state data, red bars provide a comparison with national data.
 
 ```{r setup, include=FALSE}
 library(tidyverse)
@@ -75,10 +78,6 @@ for(i in seq_along(states)) {
   
   cat('\n\n</div>\n\n')
 }
-```
-
-```{r output file, include=FALSE}
-# quarto_render(input = "state_charts.qmd", output_file = "index.html")
 ```
 
 ```{=html}
