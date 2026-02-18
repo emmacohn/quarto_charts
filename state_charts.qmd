@@ -26,14 +26,17 @@ jobcomp <- jobchange |>
   mutate(feb_2020 = .data[["2020-02-01"]],
          jan_2025 = .data[["2025-01-01"]],
          covid_change = ((.data[[current_month]] / feb_2020) - 1)*100,
-         trump_change = ((.data[[current_month]] / jan_2025) - 1)*100)
+         trump_change = ((.data[[current_month]] / jan_2025) - 1)*100,
+         us_covid  = covid_change[geo_name == "United States"],
+         us_trump = trump_change[geo_name == "United States"]) |> 
+  filter(geo_name != "United States") |> 
+  select(geo_name, covid_change, us_covid, trump_change, us_trump)
 
 job_long <- jobcomp |> 
-  select(geo_name, covid_change, trump_change) |> 
-  pivot_longer(cols = c(covid_change, trump_change),
+  pivot_longer(cols = c(covid_change, us_covid, trump_change, us_trump),
                names_to = "comparison",
                values_to = "change") |> 
-  mutate(percents = ifelse(change < 0, "negative", "positive"))
+  mutate(region = if_else(startsWith(comparison, "us_"), "us", "state"))
 ```
 
 ```{r plots, echo=FALSE, warning=FALSE, fig.width=12, fig.height=8, results='asis'}
@@ -56,10 +59,10 @@ for(i in seq_along(states)) {
   # First plot: Comparison line chart
   plot <- job_long |> 
     filter(geo_name == state) |>
-    ggplot(aes(x = comparison, y = change, fill = percents)) +
+    ggplot(aes(x = comparison, y = change, fill = region)) +
     geom_col() +
-    scale_fill_manual(values = c("negative" = "#d73027",
-                                 "positive" = "#4575b4")) +
+    scale_fill_manual(values = c("us" = "#d73027",
+                                 "state" = "#4575b4")) +
     labs(title = paste(state, "- Job change"),
          y = "Job change %",
         fill = NULL) +
