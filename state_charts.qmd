@@ -11,6 +11,7 @@ library(tidyverse)
 library(openxlsx)
 library(readxl)
 library(DatawRappr)
+library(quarto)
 ```
 
 ```{r clean up, include=FALSE, echo=FALSE, warning=FALSE}
@@ -64,13 +65,20 @@ for(i in seq_along(states)) {
     labs(title = paste(state, "- Job change"),
          y = "Job change %",
         fill = NULL) +
-    theme(legend.position = "none")
+     theme(plot.title = element_text(size = 20),
+           axis.title = element_text(size = 16),
+           axis.text = element_text(size = 14),
+           legend.position = "none") +
     theme_minimal()
   
   print(plot)
   
   cat('\n\n</div>\n\n')
 }
+```
+
+```{r output file, include=FALSE}
+# quarto_render(input = "state_charts.qmd", output_file = "index.html")
 ```
 
 ```{=html}
