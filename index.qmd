@@ -13,7 +13,7 @@ library(readxl)
 library(DatawRappr)
 ```
 
-```{r clean up, echo=FALSE, warning=FALSE}
+```{r clean up, include=FALSE, echo=FALSE, warning=FALSE}
 # Percentage change in jobs, Clean and Format
 jobchange <- read_csv("/projects/ecohn/state_jobs_day/output/jobs_nonfarm.csv") |> 
 filter(series_id != "NA") |> 
