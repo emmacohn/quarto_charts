@@ -41,7 +41,7 @@ job_long <- jobcomp |>
   mutate(region = if_else(startsWith(comparison, "us_"), "us", "state"))
 ```
 
-```{r plots, echo=FALSE, warning=FALSE, fig.width=12, fig.height=8, results='asis'}
+```{r plots, echo=FALSE, warning=FALSE, fig.width=7, fig.height=5, results='asis'}
 states <- sort(unique(jobcomp$geo_name))
 
 # Create dropdown
