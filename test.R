@@ -65,7 +65,9 @@ populate_state_charts <- function(jobcomp, chart_ids) {
       intro    = paste("Most recent data:", current_month)
     )
 
-    message("Populated chart for ", state)
+    dw_publish_chart(chart_id)
+
+    message("Populated and published chart for ", state)
   }
 }
 
